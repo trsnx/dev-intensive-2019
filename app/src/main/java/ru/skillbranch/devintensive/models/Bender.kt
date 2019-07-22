@@ -12,7 +12,12 @@ class Bender(var status:Status = Status.NORMAL, var question: Question = Questio
     }
 
     fun listenAnswer(answer:String) : Pair<String, Triple<Int, Int, Int>> {
-        return if (question.answers.contains(answer)) {
+        if (question == Question.IDLE)
+            return "${question.question}" to status.color
+        val (f, txt) = validation(answer, question)
+        return if (!f) {
+            return "$txt\n${question.question}" to status.color
+        } else if (question.answers.contains(answer.toLowerCase())) {
             question = question.nextQuestion()
             "Отлично - ты справился\n${question.question}" to status.color
         } else {
@@ -26,6 +31,34 @@ class Bender(var status:Status = Status.NORMAL, var question: Question = Questio
             }
 
         }
+    }
+
+    private fun validation(answer: String, q : Question): Pair<Boolean, String> {
+        val txt = when {
+            q == Question.NAME && (answer.isEmpty() || !answer[0].isUpperCase()) -> "Имя должно начинаться с заглавной буквы"
+            q == Question.PROFESSION && (answer.isEmpty() || !answer[0].isLowerCase()) -> "Профессия должна начинаться со строчной буквы"
+            q == Question.MATERIAL && !checkMaterial(answer) -> "Материал не должен содержать цифр"
+            q == Question.BDAY && !includeOnlyDigits(answer) -> "Год моего рождения должен содержать только цифры"
+            q == Question.SERIAL && (answer.length != 7 || !includeOnlyDigits(answer)) -> "Серийный номер содержит только цифры, и их 7"
+            else -> ""
+        }
+        return txt.isEmpty() to txt
+    }
+
+    private fun includeOnlyDigits(answer: String): Boolean {
+        for (c in answer) {
+            if (!c.isDigit())
+                return false
+        }
+        return true
+    }
+
+    private fun checkMaterial(answer: String): Boolean {
+        for (c in answer) {
+            if (c.isDigit())
+                return false
+        }
+        return true
     }
 
     enum class Status(val color: Triple<Int, Int, Int>) {
