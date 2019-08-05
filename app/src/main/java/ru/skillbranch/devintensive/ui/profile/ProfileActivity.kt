@@ -2,6 +2,8 @@ package ru.skillbranch.devintensive.ui.profile
 
 import android.graphics.*
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.View
 import android.widget.EditText
@@ -48,6 +50,7 @@ class ProfileActivity : AppCompatActivity() {
         viewModel = ViewModelProviders.of(this).get(ProfileViewModel::class.java)
         viewModel.getProfileData().observe(this, Observer { updateUI(it) })
         viewModel.getTheme().observe(this, Observer { updateTheme(it) })
+        viewModel.getRepositoryValid().observe(this, Observer { checkRepositoryState(it) })
     }
 
     private fun updateTheme(mode: Int) {
@@ -94,6 +97,25 @@ class ProfileActivity : AppCompatActivity() {
         btn_switch_theme.setOnClickListener {
             viewModel.switchTheme()
         }
+
+        et_repository.addTextChangedListener(object : TextWatcher {
+            override fun onTextChanged(text: CharSequence, p1: Int, p2: Int, p3: Int) {
+                viewModel.validateRepository(text.toString())
+            }
+
+            override fun afterTextChanged(p0: Editable?) {}
+            override fun beforeTextChanged(text: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+        })
+    }
+
+    private fun checkRepositoryState(isValid: Boolean) {
+        if (isValid) {
+            wr_repository.error = null
+        } else {
+            wr_repository.error = "Невалидный адрес репозитория"
+            et_repository.requestFocus()
+        }
+        wr_repository.isErrorEnabled = !isValid
     }
 
     private fun showCurrentMode(isEdit: Boolean) {
@@ -131,6 +153,10 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private fun saveProfileInfo() {
+        when (viewModel.getRepositoryValid()?.value) {
+            false -> et_repository.setText("")
+        }
+
         Profile(
             firstName = et_first_name.text.toString(),
             lastName = et_last_name.text.toString(),
