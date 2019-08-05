@@ -13,7 +13,7 @@ fun Activity.hideKeyboard() {
     if (view == null) {
         view = View(this)
     }
-    imm.hideSoftInputFromWindow(view!!.getWindowToken(), 0)
+    imm.hideSoftInputFromWindow(view.getWindowToken(), 0)
 }
 
 fun Activity.getRootView(): View {
