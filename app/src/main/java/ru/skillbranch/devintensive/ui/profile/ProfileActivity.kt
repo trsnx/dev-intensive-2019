@@ -17,6 +17,7 @@ import ru.skillbranch.devintensive.models.Profile
 import ru.skillbranch.devintensive.viewmodels.ProfileViewModel
 
 import ru.skillbranch.devintensive.R
+import ru.skillbranch.devintensive.utils.Utils
 
 
 class ProfileActivity : AppCompatActivity() {
@@ -65,7 +66,8 @@ class ProfileActivity : AppCompatActivity() {
             }
         }
 
-
+        val initials = Utils.toInitials(profile.firstName, profile.lastName)
+        iv_avatar.setImageBitmap(iv_avatar.drawDefaultAvatar(initials ?: ""))
     }
 
     private fun initViews(savedInstanceState: Bundle?) {
